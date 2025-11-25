@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天文航海計算互動學習</title>
+    <style>
+        :root {
+            --color-bg-primary: #0f172a;
+            --color-bg-secondary: #1e293b;
+            --color-bg-tertiary: #334155;
+            --color-border: rgba(148, 163, 184, 0.15);
+            --color-border-light: rgba(148, 163, 184, 0.25);
+            --color-text-primary: #f1f5f9;
+            --color-text-secondary: #cbd5e1;
+            --color-text-tertiary: #94a3b8;
+            --color-primary: #0891b2;
+            --color-primary-hover: #06b6d4;
+            --color-accent: #06b6d4;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            --color-focus-ring: rgba(6, 182, 212, 0.3);
+            
+            --space-4: 4px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --space-32: 32px;
+            
+            --radius-sm: 6px;
+            --radius-base: 8px;
+            --radius-lg: 12px;
+            
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+        }
+
+        body {
+            padding: var(--space-24);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 0 var(--space-8) 0;
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--color-text-tertiary);
+            margin-bottom: var(--space-32);
+            font-weight: 500;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: var(--space-16);
+            margin-bottom: var(--space-32);
+            padding: var(--space-20);
+            background: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-md);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-8);
+        }
+
+        .control-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--color-text-tertiary);
+            letter-spacing: 0.8px;
+        }
+
+        .control-input {
+            padding: var(--space-10) var(--space-12);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-base);
+            font-size: 14px;
+            background: var(--color-bg-tertiary);
+            color: var(--color-text-primary);
+            transition: all 200ms;
+        }
+
+        .control-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: var(--color-bg-tertiary);
+            box-shadow: 0 0 0 3px var(--color-focus-ring);
+        }
+
+        .btn {
+            padding: var(--space-10) var(--space-20);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+            color: var(--color-text-primary);
+            border: none;
+            border-radius: var(--radius-base);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 200ms;
+            box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(8, 145, 178, 0.4);
+        }
+
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--color-focus-ring);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.2fr;
+            gap: var(--space-24);
+            margin-bottom: var(--space-32);
+        }
+
+        .card {
+            background: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            padding: var(--space-24);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 var(--space-20) 0;
+            color: var(--color-text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-12);
+        }
+
+        .card-icon {
+            font-size: 20px;
+        }
+
+        .sphere-container {
+            width: 100%;
+            height: 420px;
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-base);
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: var(--space-20);
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .steps-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-12);
+        }
+
+        .steps-list li {
+            padding: var(--space-16);
+            background: rgba(6, 182, 212, 0.08);
+            border-left: 3px solid var(--color-primary);
+            border-radius: var(--radius-base);
+            font-size: 13px;
+            line-height: 1.7;
+            border: 1px solid var(--color-border-light);
+        }
+
+        .steps-list li strong {
+            color: var(--color-accent);
+            font-weight: 700;
+        }
+
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: var(--space-12);
+            border-radius: var(--radius-base);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            margin: var(--space-12) 0;
+            overflow-x: auto;
+            color: var(--color-text-secondary);
+            border: 1px solid var(--color-border);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .calculation-result {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-12);
+            margin: var(--space-20) 0;
+        }
+
+        .result-box {
+            background: rgba(6, 182, 212, 0.12);
+            padding: var(--space-16);
+            border-radius: var(--radius-base);
+            border: 1px solid rgba(6, 182, 212, 0.25);
+        }
+
+        .result-label {
+            font-size: 10px;
+            color: var(--color-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: var(--space-8);
+            font-weight: 700;
+        }
+
+        .result-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-accent);
+            font-family: 'Courier New', monospace;
+        }
+
+        .tabs {
+            display: flex;
+            gap: var(--space-12);
+            margin-bottom: var(--space-16);
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: var(--space-12);
+        }
+
+        .tab-btn {
+            padding: var(--space-8) var(--space-16);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text-tertiary);
+            transition: all 200ms;
+        }
+
+        .tab-btn:hover {
+            color: var(--color-text-secondary);
+        }
+
+        .tab-btn.active {
+            color: var(--color-accent);
+            border-bottom-color: var(--color-accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .example-picker {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-8);
+            margin-bottom: var(--space-16);
+        }
+
+        .example-btn {
+            padding: var(--space-10) var(--space-16);
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            transition: all 200ms;
+        }
+
+        .example-btn:hover {
+            border-color: var(--color-primary);
+            background: rgba(8, 145, 178, 0.1);
+            color: var(--color-text-primary);
+        }
+
+        .example-btn.selected {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(8, 145, 178, 0.15));
+            color: var(--color-accent);
+            border-color: var(--color-primary);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .solution-scroll {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: var(--space-12);
+        }
+
+        .solution-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .solution-scroll::-webkit-scrollbar-track {
+            background: rgba(148, 163, 184, 0.1);
+            border-radius: 3px;
+        }
+
+        .solution-scroll::-webkit-scrollbar-thumb {
+            background: rgba(6, 182, 212, 0.3);
+            border-radius: 3px;
+        }
+
+        .solution-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(6, 182, 212, 0.5);
+        }
+
+        .tip-box {
+            margin-top: var(--space-16);
+            padding: var(--space-16);
+            background: rgba(245, 158, 11, 0.08);
+            border-left: 3px solid var(--color-warning);
+            border-radius: var(--radius-base);
+            border: 1px solid var(--color-border-light);
+        }
+
+        .tip-box strong {
+            color: var(--color-warning);
+            font-size: 13px;
+        }
+
+        .tip-box p {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin: var(--space-8) 0 0 0;
+            line-height: 1.6;
+        }
+
+        .external-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-8);
+            padding: var(--space-10) var(--space-16);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: var(--radius-base);
+            color: var(--color-success);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 200ms;
+            margin-top: var(--space-16);
+        }
+
+        .external-link-btn:hover {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.2));
+            border-color: rgba(16, 185, 129, 0.6);
+            transform: translateX(2px);
+        }
+
+        .step-description {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-8);
+            padding: var(--space-8);
+            background: rgba(6, 182, 212, 0.06);
+            border-left: 2px solid var(--color-accent);
+            border-radius: var(--radius-sm);
+        }
+
+        .step-description strong {
+            color: var(--color-accent);
+        }
+
+        .correction-note {
+            font-size: 10px;
+            color: var(--color-warning);
+            font-weight: 600;
+            margin-top: var(--space-4);
+        }
+
+        @media (max-width: 1400px) {
+            .main-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .main-grid > :nth-child(3) {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .controls {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .problem-info {
+            background: rgba(6, 182, 212, 0.08);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-base);
+            padding: var(--space-16);
+            margin-bottom: var(--space-20);
+        }
+
+        .problem-header {
+            border-bottom: 2px solid var(--color-primary);
+            padding-bottom: var(--space-12);
+            margin-bottom: var(--space-12);
+        }
+
+        .problem-title {
+            margin: 0;
+            color: var(--color-accent);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .problem-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-12) var(--space-16);
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        .problem-content p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .highlight-location {
+            color: #06b6d4;
+            font-weight: 700;
+        }
+
+        .highlight-data {
+            color: #10b981;
+            font-weight: 700;
+        }
+
+        .highlight-question {
+            color: #f59e0b;
+            font-weight: 700;
+        }
+
+        .highlight-constant {
+            color: #ef4444;
+            font-weight: 700;
+        }
+
+        .problem-type {
+            font-size: 11px;
+            color: var(--color-text-tertiary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--space-8);
+        }
+
+        .problem-section {
+            margin-bottom: var(--space-12);
+        }
+
+        .problem-section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: var(--space-6);
+        }
+
+        .problem-item {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-4);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: var(--space-16);
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .controls {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .calculation-result {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 NINJA 天文航海計算互動學習</h1>
+        <p class="subtitle">3D 球形導航 • 完整解題演示 • 考試專項訓練</p>
+        <a href="https://www.perplexity.ai/search/tian-wen-hang-hai-de-guan-nian-.30S4Mb2TYeVpLcdFmhO4g?sm=d#0" 
+           target="_blank" rel="noopener noreferrer" 
+           class="external-link-btn" 
+           style="margin-bottom: var(--space-24); display: inline-flex;">
+           📚 天文航海3D概念重點
+        </a>
+
+        <!-- 控制面板 -->
+        <div class="controls">
+            <div class="control-group">
+                <label class="control-label">觀測緯度 (λa, °)</label>
+                <input type="number" class="control-input" id="latitude" value="30" min="-90" max="90" step="0.1">
+            </div>
+            <div class="control-group">
+                <label class="control-label">天體赤緯 (D, °)</label>
+                <input type="number" class="control-input" id="declination" value="15" min="-90" max="90" step="0.1">
+            </div>
+            <div class="control-group">
+                <label class="control-label">當地時角 (LHA, °)</label>
+                <input type="number" class="control-input" id="lha" value="60" min="0" max="360" step="0.1">
+            </div>
+            <div class="control-group">
+                <label class="control-label">觀測高度 (hs, °)</label>
+                <input type="number" class="control-input" id="sextant" value="45" min="0" max="90" step="0.1">
+            </div>
+            <div class="control-group">
+                <label class="control-label">眼高 (ft)</label>
+                <input type="number" class="control-input" id="eyeHeight" value="54" min="0" max="100" step="1">
+            </div>
+            <div class="control-group">
+                <button class="btn" onclick="calculateAll()">🔄 計算</button>
+            </div>
+        </div>
+
+        <!-- 主要內容區 -->
+        <div class="main-grid">
+            <!-- 3D 球形視覺化 -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-icon">🔷</span>
+                    3D 球形視覺化
+                </h2>
+                <div style="font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 12px; padding: 8px; background: rgba(6, 182, 212, 0.08); border-radius: 6px; border: 1px solid var(--color-border);">
+                    🖱️ 拖動旋轉 | 滾輪縮放 | 右鍵重置
+                </div>
+                <div class="sphere-container">
+                    <canvas id="sphereCanvas" width="500" height="500"></canvas>
+                </div>
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('tab1', this)">球面三角形</button>
+                    <button class="tab-btn" onclick="switchTab('tab2', this)">概念說明</button>
+                </div>
+                <div id="tab1" class="tab-content active">
+                    <p style="font-size: 12px; line-height: 1.8; color: var(--color-text-secondary);">
+                        <strong style="color: var(--color-accent);">球面三角形 (PZX)</strong><br>
+                        P: 北極 | Z: 天頂 | X: 天體<br><br>
+                        <strong>邊長:</strong><br>
+                        • PZ = 90° - λa (極距)<br>
+                        • PX = 90° - D (餘赤緯)<br>
+                        • ZX = 90° - Ho (天頂距)<br><br>
+                        <strong>角度:</strong><br>
+                        • LHA (當地時角)<br>
+                        • Z (方位角)
+                    </p>
+                </div>
+                <div id="tab2" class="tab-content">
+                    <p style="font-size: 12px; line-height: 1.8; color: var(--color-text-secondary);">
+                        <strong style="color: var(--color-accent);">為什麼需要 3D?</strong><br><br>
+                        天文航海發生在球面，不能用平面幾何<br><br>
+                        • 內角和 ≠ 180°<br>
+                        • 邊長用角度表示<br>
+                        • 使用球面正弦/余弦定律
+                    </p>
+                </div>
+            </div>
+
+            <!-- 計算結果 -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-icon">📊</span>
+                    計算結果
+                </h2>
+                <div class="calculation-result">
+                    <div class="result-box">
+                        <div class="result-label">計算高度 (Hc)</div>
+                        <div class="result-value" id="hcResult">45.23°</div>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-label">方位角 (Zn)</div>
+                        <div class="result-value" id="znResult">125.45°</div>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-label">截距 (IC)</div>
+                        <div class="result-value" id="icResult">+1.23nm</div>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-label">改正高度 (Ho)</div>
+                        <div class="result-value" id="hoResult">44.82°</div>
+                    </div>
+                </div>
+
+                <div class="tabs" style="margin-top: 24px;">
+                    <button class="tab-btn active" onclick="switchTab('tab3', this)">公式與修正</button>
+                </div>
+                <div id="tab3" class="tab-content active">
+                    <p style="font-size: 12px; margin-bottom: 8px; font-weight: 600; color: var(--color-text-secondary);">計算高度 (Hc):</p>
+                    <div class="formula">sin(Hc) = sin(D)·sin(λa) + 
+          cos(D)·cos(λa)·cos(LHA)</div>
+                    <p style="font-size: 12px; margin: 12px 0 8px 0; font-weight: 600; color: var(--color-text-secondary);">方位角 (Zn):</p>
+                    <div class="formula">cos(Z) = [sin(D) - sin(λa)·sin(Hc)] /
+         [cos(λa)·cos(Hc)]</div>
+                    <p style="font-size: 12px; margin: 12px 0 8px 0; font-weight: 600; color: var(--color-text-secondary);">高度修正:</p>
+                    <div style="font-size: 11px; color: var(--color-text-secondary); line-height: 1.8;">
+                        • 視差修正 (DIP): √(眼高 ft) × 0.97 / 60<br>
+                        • 折射修正 (Refraction): -0.97 × tan(Ho) / 60<br>
+                        • 太陽邊緣修正 (下邊緣): +16' | (上邊緣): -16'<br>
+                        • 月球視差修正: 依天體視差表
+                    </div>
+                </div>
+            </div>
+
+            <!-- 解題步驟 (右側) -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-icon">📋</span>
+                    解題步驟
+                </h2>
+                <div class="example-picker">
+                    <button class="example-btn selected" onclick="loadExample(1, this)">例題 1: 中天觀測</button>
+                    <button class="example-btn" onclick="loadExample(2, this)">例題 2: 標準測天</button>
+                    <button class="example-btn" onclick="loadExample(3, this)">例題 3: 低角觀測</button>
+                    <button class="example-btn" onclick="loadExample(4, this)">例題 4: 進階計算</button>
+                </div>
+                
+                <!-- 題目資訊 -->
+                <div class="problem-info">
+                    <div class="problem-header">
+                        <h3 class="problem-title" id="problemTitle">例題 1: 中天觀測</h3>
+                    </div>
+                    <div class="problem-type" id="problemType">天體觀測 | 中天定位</div>
+                    <div id="problemContent"></div>
+                </div>
+
+                <!-- 解題步驟 -->
+                <div class="solution-scroll" id="solutionContentRight">
+                    <ul class="steps-list">
+                        <li><strong>第一步:</strong> 檢查觀測數據</li>
+                        <li><strong>第二步:</strong> 計算改正高度</li>
+                        <li><strong>第三步:</strong> 確定天體數據</li>
+                        <li><strong>第四步:</strong> 套用公式</li>
+                        <li><strong>第五步:</strong> 計算截距</li>
+                        <li><strong>第六步:</strong> 確定方位角</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 三角函數輔助 (度數)
+        const deg2rad = d => d * Math.PI / 180;
+        const rad2deg = r => r * 180 / Math.PI;
+        const sind = d => Math.sin(deg2rad(d));
+        const cosd = d => Math.cos(deg2rad(d));
+        const asind = v => rad2deg(Math.asin(v));
+        const acosd = v => rad2deg(Math.acos(v));
+
+        // 度數轉 °' 格式
+        function formatDegrees(deg) {
+            const d = Math.floor(Math.abs(deg));
+            const m = Math.abs(deg - d) * 60;
+            return d + '° ' + m.toFixed(1) + "'";
+        }
+
+        // 根據題型生成解題步驟
+        function generateSolutionByType(exData, results, solutionType) {
+            if (solutionType === 'meridian') return generateMeridianSolution(exData, results);
+            if (solutionType === 'low-angle') return generateLowAngleSolution(exData, results);
+            return generateStandardSolution(exData, results);
+        }
+
+        // 中天觀測解題步驟 (簡化版)
+        function generateMeridianSolution(exData, results) {
+            const { Ho, Hc, Zn, IC, dip, refraction } = results;
+            const { gmt, location, sextantReading, indexError, declination, latitude, eyeHeight } = exData;
+            
+            let html = '';
+            html += '<li><strong>第一步: 檢查觀測數據</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 記錄六分儀讀數、眼高、指數差等基礎資料，檢查時間記錄</div>';
+            html += '<div class="formula">GMT: ' + gmt + ' | 位置: ' + location + '<br>hs: ' + formatDegrees(sextantReading) + ' | 眼高: ' + eyeHeight + ' ft | 指數差: ' + (indexError >= 0 ? '+' : '') + formatDegrees(indexError) + '</div></li>';
+            
+            html += '<li><strong>第二步: 計算改正高度 (Ho)</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 將六分儀讀數修正，考慮眼高造成的視差和大氣折射</div>';
+            html += '<div class="formula">眼高修正 (DIP) = ' + formatDegrees(dip) + ' (查表或用 √眼高 × 0.97 ÷ 60)<br>折射修正 = ' + formatDegrees(refraction) + ' (查修正表)<br><br>Ho = hs + 指數差 - DIP - 折射<br>Ho = ' + formatDegrees(sextantReading) + ' + ' + (indexError >= 0 ? '+' : '') + formatDegrees(indexError) + ' - ' + formatDegrees(dip) + ' - ' + formatDegrees(Math.abs(refraction)) + '<br><strong>= ' + formatDegrees(Ho) + '</strong></div>';
+            html += '<div class="correction-note">⚠️  DIP 和折射值需從航海表查得，或用公式計算</div></li>';
+            
+            html += '<li><strong>第三步: 中天高度計算</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 因為 LHA ≈ 0° (中天)，簡化球面三角公式，直接用高度和赤緯求緯度</div>';
+            html += '<div class="formula">中天時: sin(Hc) = sin(D) × sin(λa) + cos(D) × cos(λa)<br>由於中天特性簡化為: sin(Hc) ≈ sin(D) · sin(λa) + cos(D) · cos(λa)<br><strong>Hc = ' + formatDegrees(Hc) + '°</strong></div></li>';
+            
+            html += '<li><strong>第四步: 計算截距 (IC)</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 比較實際觀測高度和理論計算高度的差值，確定定位精度</div>';
+            html += '<div class="formula">IC = (Ho - Hc) × 60 (轉換為海里)<br>IC = (' + formatDegrees(Ho) + ' - ' + formatDegrees(Hc) + ') × 60<br><strong>= ' + (IC >= 0 ? '+' : '') + IC.toFixed(1) + ' 海里 (Towards/Away from body)</strong></div></li>';
+            
+            html += '<li><strong>第五步: 中天方位角</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 中天時方位角特殊簡化 (北半球 180°，南半球 0°)</div>';
+            html += '<div class="formula">中天觀測時:<br>• 北半球 (λa > 0): 天體南方時 Zn = 180°<br>• 北半球: 天體北方時 Zn = 0°<br><strong>Zn = ' + formatDegrees(Zn) + '°</strong></div></li>';
+            
+            return '<ul class="steps-list">' + html + '</ul>';
+        }
+
+        // 低角觀測解題步驟
+        function generateLowAngleSolution(exData, results) {
+            const { Ho, Hc, Zn, IC, dip, refraction } = results;
+            const { gmt, location, sextantReading, indexError, declination, latitude, lha, gha, eyeHeight } = exData;
+            
+            let html = '';
+            html += '<li><strong>第一步: 檢查並記錄觀測數據</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 低角觀測需特別注意大氣折射和測量精度。紀錄所有觀測資料</div>';
+            html += '<div class="formula">GMT: ' + gmt + ' | 位置: ' + location + '<br>hs: ' + formatDegrees(sextantReading) + ' ⚠️ 低角 | 眼高: ' + eyeHeight + ' ft<br>赤緯 (D): ' + formatDegrees(declination) + ' | 時角 (LHA): ' + formatDegrees(lha) + '</div></li>';
+            
+            html += '<li><strong>第二步: 計算改正高度 (Ho) - 加強折射修正</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 低角時折射影響大，必須使用精確折射修正表</div>';
+            html += '<div class="formula">眼高修正 (DIP) = ' + formatDegrees(dip) + '<br>折射修正 (Refraction) = ' + formatDegrees(refraction) + ' ⚠️ 查詳細低角修正表<br>額外修正 (如有) = (查表)<br><br>Ho = ' + formatDegrees(sextantReading) + ' + ' + (indexError >= 0 ? '+' : '') + formatDegrees(indexError) + ' - ' + formatDegrees(dip) + ' - ' + formatDegrees(Math.abs(refraction)) + '<br><strong>= ' + formatDegrees(Ho) + '</strong></div>';
+            html += '<div class="correction-note">📌 低角修正需查 Altitude Correction Tables for 15° to 90° or HO 249</div></li>';
+            
+            html += '<li><strong>第三步: 確定天體數據</strong>';
+            html += '<div class="formula">D = ' + formatDegrees(declination) + ' | GHA = ' + formatDegrees(gha) + '<br>LHA = ' + formatDegrees(lha) + ' | λa = ' + formatDegrees(latitude) + '</div></li>';
+            
+            html += '<li><strong>第四步: 套用球面三角公式計算 Hc</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 使用完整球面三角公式，低角時不可簡化</div>';
+            html += '<div class="formula">sin(Hc) = sin(D)·sin(λa) + cos(D)·cos(λa)·cos(LHA)<br>sin(Hc) = sin(' + formatDegrees(declination) + ')·sin(' + formatDegrees(latitude) + ') +<br>         cos(' + formatDegrees(declination) + ')·cos(' + formatDegrees(latitude) + ')·cos(' + formatDegrees(lha) + ')<br><strong>Hc = ' + formatDegrees(Hc) + '</strong></div></li>';
+            
+            html += '<li><strong>第五步: 計算截距 (IC)</strong>';
+            html += '<div class="formula">IC = (Ho - Hc) × 60 = (' + formatDegrees(Ho) + ' - ' + formatDegrees(Hc) + ') × 60<br><strong>= ' + (IC >= 0 ? '+' : '') + IC.toFixed(1) + ' 海里</strong></div>';
+            html += '<div class="correction-note">⚠️ 低角觀測精度ℴ有限，截差 >5nm 需檢查所有修正值</div></li>';
+            
+            html += '<li><strong>第六步: 確定方位角 (Azimuth)</strong>';
+            html += '<div class="formula">cos(Z) = [sin(D) - sin(λa)·sin(Hc)] / [cos(λa)·cos(Hc)]<br>根據 LHA 象限調整得 Zn<br><strong>Zn = ' + formatDegrees(Zn) + '°</strong></div></li>';
+            
+            return '<ul class="steps-list">' + html + '</ul>';
+        }
+
+        // 標準完整測天解題步驟
+        function generateStandardSolution(exData, results) {
+            const { Ho, Hc, Zn, IC, dip, refraction } = results;
+            const { gmt, location, sextantReading, indexError, declination, latitude, lha, gha, eyeHeight } = exData;
+            
+            let html = '';
+            html += '<li><strong>第一步: 檢查並記錄觀測數據</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 紀錄六分儀讀數、時間、眼高等基礎參數，準備進行高度修正</div>';
+            html += '<div class="formula">GMT: ' + gmt + ' | 位置: ' + location + '<br>hs: ' + formatDegrees(sextantReading) + ' | 眼高: ' + eyeHeight + ' ft | 指數差: ' + (indexError >= 0 ? '+' : '') + formatDegrees(indexError) + '</div></li>';
+            
+            html += '<li><strong>第二步: 計算改正高度 (Ho)</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 將六分儀讀數修正成改正高度。需修正眼高(DIP)、折射(Refraction)、邊緣修正等</div>';
+            html += '<div class="formula">DIP = ' + formatDegrees(dip) + ' (查表: √眼高 ft × 0.97 ÷ 60)<br>折射 = ' + formatDegrees(refraction) + ' (查修正表)<br><br>Ho = hs ± IE - DIP - 折射<br>Ho = ' + formatDegrees(sextantReading) + ' + ' + (indexError >= 0 ? '+' : '') + formatDegrees(indexError) + ' - ' + formatDegrees(dip) + ' - ' + formatDegrees(Math.abs(refraction)) + '<br><strong>= ' + formatDegrees(Ho) + '</strong></div>';
+            html += '<div class="correction-note">📖 修正值查: Altitude Correction Tables HO 249 或航海年曆</div></li>';
+            
+            html += '<li><strong>第三步: 確定天體數據</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 從航海年曆查得天體赤緯(D)和格林威治時角(GHA)，計算當地時角(LHA)</div>';
+            html += '<div class="formula">天體赤緯 (D) = ' + formatDegrees(declination) + ' (查航海年曆)<br>GHA = ' + formatDegrees(gha) + ' (查航海年曆)<br>觀測地經度 (Longitude) → LHA = GHA + E經 (或 GHA - W經)<br><strong>LHA = ' + formatDegrees(lha) + '°</strong></div></li>';
+            
+            html += '<li><strong>第四步: 套用球面三角公式求計算高度 (Hc)</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 使用球面三角正弦公式，代入赤緯、緯度、時角計算理論高度</div>';
+            html += '<div class="formula">sin(Hc) = sin(D)·sin(λa) + cos(D)·cos(λa)·cos(LHA)<br><br>sin(Hc) = sin(' + formatDegrees(declination) + ')·sin(' + formatDegrees(latitude) + ') +<br>         cos(' + formatDegrees(declination) + ')·cos(' + formatDegrees(latitude) + ')·cos(' + formatDegrees(lha) + ')<br><strong>Hc = ' + formatDegrees(Hc) + '°</strong></div>';
+            html += '<div class="correction-note">💡 也可用 HO 249 表查得 Hc，或計算器直接運算</div></li>';
+            
+            html += '<li><strong>第五步: 計算截距 (Intercept)</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 比較實測高度(Ho)和理論高度(Hc)，差值即為截距，用於圖上定位</div>';
+            html += '<div class="formula">截距 IC = (Ho - Hc) × 60 (單位: 海里 nm)<br><br>IC = (' + formatDegrees(Ho) + ' - ' + formatDegrees(Hc) + ') × 60<br><strong>= ' + (IC >= 0 ? '+' : '') + IC.toFixed(1) + ' 海里</strong><br><br>判定: 正(+)值→向天體靠近 | 負(-)值→背離天體</div></li>';
+            
+            html += '<li><strong>第六步: 確定方位角 (Azimuth Zn)</strong>';
+            html += '<div class="step-description"><strong>做什麼:</strong> 計算天體相對真北的方向角，用於圖上繪製定位線</div>';
+            html += '<div class="formula">球面三角余弦公式:<br>cos(Z) = [sin(D) - sin(λa)·sin(Hc)] / [cos(λa)·cos(Hc)]<br><br>根據 LHA 象限確定最終方位角 Zn:<br>' + (lha > 180 ? 'LHA > 180° (西半球): Zn = 360° - Z' : 'LHA < 180° (東半球): Zn = Z') + '<br><strong>Zn = ' + formatDegrees(Zn) + '°</strong></div></li>';
+            
+            return '<ul class="steps-list">' + html + '</ul>';
+        }
+
+        // 計算所有結果
+        function calculateAll() {
+            const lambda = parseFloat(document.getElementById('latitude').value);
+            const D = parseFloat(document.getElementById('declination').value);
+            const LHA = parseFloat(document.getElementById('lha').value);
+            const hs = parseFloat(document.getElementById('sextant').value);
+            const eyeHeight = parseFloat(document.getElementById('eyeHeight').value);
+
+            const dip = 0.97 * Math.sqrt(eyeHeight) / 60;
+            const refraction = -0.97 * Math.tan(deg2rad(Math.abs(hs - dip))) / 60;
+            const Ho = hs - dip - refraction;
+            
+            const sin_Hc = sind(D) * sind(lambda) + cosd(D) * cosd(lambda) * cosd(LHA);
+            const Hc = asind(Math.max(-1, Math.min(1, sin_Hc)));
+            
+            let Z;
+            if (Math.abs(cosd(Hc)) < 0.001) {
+                Z = LHA > 180 ? 180 : 0;
+            } else {
+                const cos_Z = (sind(D) - sind(lambda) * sind(Hc)) / (cosd(lambda) * cosd(Hc));
+                Z = acosd(Math.max(-1, Math.min(1, cos_Z)));
+            }
+            
+            let Zn = LHA > 180 ? 360 - Z : Z;
+            const intercept = (Ho - Hc) * 60;
+
+            document.getElementById('hcResult').textContent = Hc.toFixed(2) + '°';
+            document.getElementById('znResult').textContent = Zn.toFixed(2) + '°';
+            document.getElementById('icResult').textContent = (intercept >= 0 ? '+' : '') + intercept.toFixed(2) + ' nm';
+            document.getElementById('hoResult').textContent = Ho.toFixed(2) + '°';
+
+            drawSphere(lambda, D, LHA, Hc, Zn);
+        }
+
+        // 3D旋轉狀態
+        let sphereRotation = { rotX: 0.5, rotY: 0.5, scale: 1.2 };
+        let mouseDown = false, lastMouseX = 0, lastMouseY = 0;
+
+        function rotatePoint(x, y, z, rotX, rotY) {
+            let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
+            let z1 = y * Math.sin(rotX) + z * Math.cos(rotX);
+            let x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
+            let z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
+            return { x: x2, y: y1, z: z2 };
+        }
+
+        function project3D(x, y, z, centerX, centerY, baseRadius) {
+            const perspective = 400 + z;
+            const scale = (300 / perspective) * sphereRotation.scale;
+            return { x: centerX + x * scale, y: centerY - y * scale, z: perspective };
+        }
+
+        function setupMouseEvents() {
+            const canvas = document.getElementById('sphereCanvas');
+            canvas.addEventListener('mousedown', (e) => { mouseDown = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
+            canvas.addEventListener('mousemove', (e) => {
+                if (mouseDown) {
+                    sphereRotation.rotY += (e.clientX - lastMouseX) * 0.01;
+                    sphereRotation.rotX += (e.clientY - lastMouseY) * 0.01;
+                    lastMouseX = e.clientX; lastMouseY = e.clientY;
+                    calculateAll();
+                }
+            });
+            canvas.addEventListener('mouseup', () => { mouseDown = false; });
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                sphereRotation.scale *= (1 - e.deltaY * 0.001);
+                sphereRotation.scale = Math.max(0.5, Math.min(2, sphereRotation.scale));
+                calculateAll();
+            });
+            canvas.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                sphereRotation = { rotX: 0.5, rotY: 0.5, scale: 1.2 };
+                calculateAll();
+            });
+        }
+
+        function drawSphere(lambda, D, LHA, Hc, Zn) {
+            const canvas = document.getElementById('sphereCanvas');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2, centerY = canvas.height / 2, baseRadius = 100;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 背景漸層
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            bgGrad.addColorStop(0, 'rgba(6, 182, 212, 0.08)');
+            bgGrad.addColorStop(0.5, 'rgba(8, 145, 178, 0.04)');
+            bgGrad.addColorStop(1, 'rgba(15, 23, 42, 0.06)');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 球體漸層 - 改進版
+            const gradient = ctx.createRadialGradient(centerX - 60, centerY - 60, 10, centerX, centerY, baseRadius * sphereRotation.scale);
+            gradient.addColorStop(0, 'rgba(6, 182, 212, 0.6)');
+            gradient.addColorStop(0.4, 'rgba(6, 182, 212, 0.35)');
+            gradient.addColorStop(0.8, 'rgba(8, 145, 178, 0.15)');
+            gradient.addColorStop(1, 'rgba(15, 23, 42, 0.4)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, baseRadius * sphereRotation.scale, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 高光效果
+            const highlight = ctx.createRadialGradient(centerX - 40, centerY - 40, 0, centerX - 40, centerY - 40, 80);
+            highlight.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+            highlight.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = highlight;
+            ctx.fill();
+            
+            // 球體邊框 - 更清晰
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.6)';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // 經緯線 - 更清晰
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.2)';
+            ctx.lineWidth = 0.9;
+            for (let lat = -90; lat <= 90; lat += 30) {
+                for (let lon = 0; lon < 360; lon += 15) {
+                    let x = baseRadius * Math.cos(deg2rad(lat)) * Math.cos(deg2rad(lon));
+                    let y = baseRadius * Math.sin(deg2rad(lat));
+                    let z = baseRadius * Math.cos(deg2rad(lat)) * Math.sin(deg2rad(lon));
+                    const rotated = rotatePoint(x, y, z, sphereRotation.rotX, sphereRotation.rotY);
+                    const proj = project3D(rotated.x, rotated.y, rotated.z, centerX, centerY, baseRadius);
+                    if (lon === 0) { ctx.beginPath(); ctx.moveTo(proj.x, proj.y); } else { ctx.lineTo(proj.x, proj.y); }
+                }
+                ctx.stroke();
+            }
+
+            let pole = rotatePoint(0, baseRadius, 0, sphereRotation.rotX, sphereRotation.rotY);
+            let polePr = project3D(pole.x, pole.y, pole.z, centerX, centerY, baseRadius);
+            ctx.fillStyle = 'rgba(59, 130, 246, 0.8)';
+            ctx.beginPath();
+            ctx.arc(polePr.x, polePr.y, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(203, 213, 225, 0.9)';
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('P', polePr.x, polePr.y - 12);
+
+            let celX = baseRadius * Math.cos(deg2rad(D)) * Math.cos(deg2rad(LHA));
+            let celY = baseRadius * Math.sin(deg2rad(D));
+            let celZ = baseRadius * Math.cos(deg2rad(D)) * Math.sin(deg2rad(LHA));
+            let celRotated = rotatePoint(celX, celY, celZ, sphereRotation.rotX, sphereRotation.rotY);
+            let celProj = project3D(celRotated.x, celRotated.y, celRotated.z, centerX, centerY, baseRadius);
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(celProj.x, celProj.y, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(203, 213, 225, 0.9)';
+            ctx.fillText('天體', celProj.x, celProj.y - 12);
+
+            let obsX = baseRadius * Math.cos(deg2rad(lambda));
+            let obsY = baseRadius * Math.sin(deg2rad(lambda));
+            let obsRotated = rotatePoint(obsX, obsY, 0, sphereRotation.rotX, sphereRotation.rotY);
+            let obsProj = project3D(obsRotated.x, obsRotated.y, obsRotated.z, centerX, centerY, baseRadius);
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(obsProj.x, obsProj.y, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(203, 213, 225, 0.9)';
+            ctx.fillText('觀測', obsProj.x, obsProj.y - 12);
+
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.moveTo(polePr.x, polePr.y); ctx.lineTo(obsProj.x, obsProj.y); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(polePr.x, polePr.y); ctx.lineTo(celProj.x, celProj.y); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(celProj.x, celProj.y); ctx.lineTo(obsProj.x, obsProj.y); ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = 'rgba(203, 213, 225, 0.8)';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`LHA: ${LHA.toFixed(1)}° | Hc: ${Hc.toFixed(1)}° | Zn: ${Zn.toFixed(1)}°`, 15, 25);
+        }
+
+        function switchTab(tabId, btn) {
+            const allTabs = btn.parentElement.parentElement.querySelectorAll('.tab-content');
+            const allBtns = btn.parentElement.querySelectorAll('.tab-btn');
+            allTabs.forEach(t => t.classList.remove('active'));
+            allBtns.forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        const examples = {
+            1: { 
+                title: '例題 1: 中天觀測定位', 
+                problemType: '天體觀測 | 中天定位',
+                solutionType: 'meridian',
+                date: '2024年1月15日',
+                gmt: '02:30:00', 
+                location: '30°00.0\'N 60°00.0\'E', 
+                sextantReading: 45.253, 
+                indexError: 0.0417, 
+                gha: 125.753, 
+                declination: -15.392, 
+                latitude: 30, 
+                lha: 0, 
+                eyeHeight: 54, 
+                celestialBody: '太陽 (下邊緣)', 
+                data: { latitude: 30, declination: 15, lha: 0, sextant: 45, eyeHeight: 54 } 
+            },
+            2: { 
+                title: '例題 2: 標準測天觀測', 
+                problemType: '天體觀測 | 標準測天',
+                solutionType: 'standard',
+                date: '2024年3月20日',
+                gmt: '08:45:00', 
+                location: '35°15.0\'N 120°30.0\'E', 
+                sextantReading: 40.217, 
+                indexError: -0.0167, 
+                gha: 212.5, 
+                declination: -5.25, 
+                latitude: 35, 
+                lha: 120, 
+                eyeHeight: 45, 
+                celestialBody: '木星', 
+                data: { latitude: 35, declination: -5, lha: 120, sextant: 40, eyeHeight: 45 } 
+            },
+            3: { 
+                title: '例題 3: 低角天體觀測', 
+                problemType: '天體觀測 | 低角修正',
+                solutionType: 'low-angle',
+                date: '2024年6月01日',
+                gmt: '14:20:00', 
+                location: '40°45.0\'N 75°30.0\'W', 
+                sextantReading: 15.167, 
+                indexError: 0.025, 
+                gha: 305.417, 
+                declination: 0, 
+                latitude: 40, 
+                lha: 90, 
+                eyeHeight: 50, 
+                celestialBody: '水星', 
+                data: { latitude: 40, declination: 0, lha: 90, sextant: 15, eyeHeight: 50 } 
+            },
+            4: { 
+                title: '例題 4: 標準測天綜合練習', 
+                problemType: '天體觀測 | 綜合計算',
+                solutionType: 'standard',
+                date: '2024年9月15日',
+                gmt: '18:10:00', 
+                location: '25°30.0\'N 140°00.0\'E', 
+                sextantReading: 55.5, 
+                indexError: 0.0083, 
+                gha: 28.333, 
+                declination: 20.167, 
+                latitude: 25, 
+                lha: 300, 
+                eyeHeight: 60, 
+                celestialBody: '土星', 
+                data: { latitude: 25, declination: 20, lha: 300, sextant: 55, eyeHeight: 60 } 
+            }
+        };
+
+        function loadExample(num, btn) {
+            if (!examples[num]) return;
+            const ex = examples[num];
+            document.getElementById('latitude').value = ex.data.latitude;
+            document.getElementById('declination').value = ex.data.declination;
+            document.getElementById('lha').value = ex.data.lha;
+            document.getElementById('sextant').value = ex.data.sextant;
+            document.getElementById('eyeHeight').value = ex.data.eyeHeight;
+
+            calculateAll();
+
+            const lambda = ex.data.latitude;
+            const D = ex.data.declination;
+            const LHA = ex.data.lha;
+            const hs = ex.data.sextant;
+            const eyeHeight = ex.data.eyeHeight;
+            
+            const dip = 0.97 * Math.sqrt(eyeHeight) / 60;
+            const refraction = -0.97 * Math.tan(deg2rad(Math.abs(hs - dip))) / 60;
+            const Ho = hs + ex.indexError - dip - refraction;
+            
+            const sin_Hc = sind(D) * sind(lambda) + cosd(D) * cosd(lambda) * cosd(LHA);
+            const Hc = asind(Math.max(-1, Math.min(1, sin_Hc)));
+            
+            let Z;
+            if (Math.abs(cosd(Hc)) < 0.001) Z = LHA > 180 ? 180 : 0;
+            else {
+                const cos_Z = (sind(D) - sind(lambda) * sind(Hc)) / (cosd(lambda) * cosd(Hc));
+                Z = acosd(Math.max(-1, Math.min(1, cos_Z)));
+            }
+            
+            let Zn = LHA > 180 ? 360 - Z : Z;
+            const intercept = (Ho - Hc) * 60;
+
+            const results = { Ho, Hc, Zn, IC: intercept, dip, refraction };
+            const stepsHtml = generateSolutionByType(ex, results, ex.solutionType);
+            
+            // 更新題目資訊
+            document.getElementById('problemTitle').textContent = ex.title;
+            document.getElementById('problemType').textContent = ex.problemType;
+            
+            const problemHtml = `
+                <div class="problem-section">
+                    <div class="problem-section-title">已知條件 (Known Conditions):</div>
+                    <div class="problem-item"><strong>日期時間:</strong> <span class="highlight-location">${ex.date}</span> <span class="highlight-location">GMT ${ex.gmt}</span></div>
+                    <div class="problem-item"><strong>觀測位置:</strong> <span class="highlight-location">${ex.location}</span></div>
+                    <div class="problem-item"><strong>天體:</strong> <span class="highlight-data">${ex.celestialBody}</span></div>
+                    <div class="problem-item"><strong>赤緯 (D):</strong> <span class="highlight-data">${formatDegrees(Math.abs(ex.declination))}${ex.declination < 0 ? 'S' : 'N'}</span></div>
+                </div>
+                
+                <div class="problem-section">
+                    <div class="problem-section-title">觀測數據 (Observation Data):</div>
+                    <div class="problem-item"><strong>六分儀讀數 (hs):</strong> <span class="highlight-data">${formatDegrees(ex.sextantReading)}</span></div>
+                    <div class="problem-item"><strong>眼高 (Eye Height):</strong> <span class="highlight-constant">${ex.eyeHeight} feet</span></div>
+                    <div class="problem-item"><strong>指數差 (Index Error):</strong> <span class="highlight-data">${ex.indexError >= 0 ? '+' : ''}${formatDegrees(ex.indexError)}</span></div>
+                    <div class="problem-item"><strong>時角 (LHA):</strong> <span class="highlight-data">${formatDegrees(ex.lha)}</span></div>
+                </div>
+                
+                <div class="problem-section">
+                    <div class="problem-section-title">求解 (Find):</div>
+                    <div class="problem-item">• 改正高度 (Ho - Observed Altitude)</div>
+                    <div class="problem-item">• 計算高度 (Hc - Computed Altitude)</div>
+                    <div class="problem-item">• 方位角 (Zn - Azimuth)</div>
+                    <div class="problem-item">• 截距 (IC - Intercept)</div>
+                </div>
+            `;
+            document.getElementById('problemContent').innerHTML = problemHtml;
+            
+            // 更新解題步驟
+            document.getElementById('solutionContentRight').innerHTML = stepsHtml;
+
+            document.querySelectorAll('.example-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        setupMouseEvents();
+        calculateAll();
+        loadExample(1, document.querySelector('.example-btn'));
+    </script>
+</body>
+</html>
